@@ -1,59 +1,66 @@
 // android/app/build.gradle.kts
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-android {
-    // ต้องตรงกับ package ใน MainActivity.kt
-    namespace = "com.example.test"
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+}
 
-    // ถ้าเครื่องคุณมี Android SDK 36 แล้ว ใช้ 36 ได้
-    // ถ้า build เจอ error ว่าไม่มี android-36 ให้เปลี่ยนเป็น 34 แทน
-    compileSdk = 36
+android {
+    namespace = "com.example.test" // ให้ตรงกับ package ของ MainActivity.kt/Manifest
+    compileSdk = 36 // ถ้า build ไม่ผ่านเพราะยังไม่ติดตั้ง 36 ให้ใช้ 34 ไปก่อน
 
     defaultConfig {
-        // ตัวระบุแอปตอนติดตั้งเครื่อง
         applicationId = "com.example.test"
-
-        // ปล่อยให้ Flutter กำหนดขั้นต่ำ (ปัจจุบันคือ 21)
         minSdk = flutter.minSdkVersion
-
-        // เป้าหมาย API — ถ้าเครื่องไม่มี 36 ให้ลดเป็น 34
         targetSdk = 36
-
-        // เวอร์ชันแอป
         versionCode = 1
         versionName = "1.0.0"
     }
 
-    buildTypes {
-        getByName("release") {
-            // ปิด shrink/minify ในช่วงพัฒนา
-            isMinifyEnabled = false
-            isShrinkResources = false
-
-            // ใช้ debug keystore เซ็นเพื่อทดสอบ (พอจะปล่อยจริงค่อยตั้ง signingConfig ของ release เอง)
-            signingConfig = signingConfigs.getByName("debug")
-        }
-        getByName("debug") {
-            // ตั้งค่าเฉพาะ debug ได้ตามต้องการ
+    // ผูก signing เฉพาะเมื่อมี key.properties
+    if (keystorePropertiesFile.exists()) {
+        signingConfigs {
+            create("release") {
+                keyAlias = keystoreProperties["keyAlias"] as String?
+                keyPassword = keystoreProperties["keyPassword"] as String?
+                // NOTE: ใน key.properties ให้ตั้ง storeFile=hereme.keystore (ไม่ต้องมี app/)
+                storeFile = (keystoreProperties["storeFile"] as String?)?.let { file(it) }
+                storePassword = keystoreProperties["storePassword"] as String?
+                storeType = "pkcs12" // <<< สำคัญสำหรับไฟล์ .keystore ที่เป็น PKCS12
+            }
         }
     }
 
-    // ใช้ Java 11 เพื่อตัด warning เก่า (source/target 8 obsolete)
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = false
+            isShrinkResources = false
+            if (keystorePropertiesFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+        getByName("debug") { }
+    }
+
+    // JDK ที่ใช้รัน AGP ควรเป็น 17; ส่วน source/target 11 ใช้ได้
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-
-    kotlinOptions {
-        jvmTarget = "11"
-    }
+    kotlinOptions { jvmTarget = "11" }
 }
 
-flutter {
-    // path ไปยังโฟลเดอร์โปรเจกต์ Flutter
-    source = "../.."
-}
+flutter { source = "../.." }
