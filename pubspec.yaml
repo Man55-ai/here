@@ -1,0 +1,76 @@
+name: test
+description: "A new Flutter project."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"   # ใช้ให้เข้ากับ Flutter 3.24.x (Dart 3.5.x)
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Core UI
+  cupertino_icons: ^1.0.8
+  intl: ^0.20.2
+
+  # Networking / Storage
+  http: ^1.1.0
+  path_provider: ^2.1.2
+  shared_preferences: ^2.2.3
+
+  # Firebase/Backend & Auth
+  supabase_flutter: ^2.10.0
+  sign_in_with_apple: ^7.0.1   # ใช้บน iOS/macOS เท่านั้น
+
+  # Utils
+  uuid: ^4.5.0
+  csv: ^6.0.0
+
+  # UI Widgets
+  table_calendar: ^3.0.9
+  fl_chart: ^0.70.2           # ใช้แทน charts_flutter
+  image_picker: ^1.1.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+  # Splash & App Icon
+  flutter_native_splash: ^2.4.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/S11_clean.csv
+    - assets/here.png        # 👈 ไฟล์โลโก้หัวใจสีเขียว HereMe
+    - assets/c.png
+    - assets/hereme.png
+  fonts:
+    - family: NotoSansThai
+      fonts:
+        - asset: assets/fonts/NotoSansThai-Regular.ttf
+        - asset: assets/fonts/NotoSansThai-Bold.ttf
+        - asset: "assets/fonts/NotoSansThai-VariableFont_wdth,wght.ttf"
+          weight: 700
+
+# 👇 Native splash (ก่อนเฟรมแรก)
+flutter_native_splash:
+  color: "#ffffff"          # สีพื้นหลัง
+  image: assets/c.png     # 1x1 โปร่งใส
+  android: true
+  ios: true
+  android_12:
+    color: "#ffffff"
+    image: assets/c.png   # 1x1 โปร่งใส (แก้ปัญหาไอคอนวงกลม)
+
+
+# 👇 App icon
+flutter_icons:
+  android: true
+  ios: true
+  image_path: assets/here.png   # แนะนำไฟล์ PNG 1024x1024
+  remove_alpha_ios: true
