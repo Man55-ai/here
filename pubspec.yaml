@@ -49,6 +49,11 @@ flutter:
     - assets/here.png        # 👈 ไฟล์โลโก้หัวใจสีเขียว HereMe
     - assets/c.png
     - assets/hereme.png
+    - assets/images/intro1.png
+    - assets/images/intro2.png
+    - assets/images/intro3.png
+    - assets/images/intro4.png
+
   fonts:
     - family: NotoSansThai
       fonts:
