@@ -1,3 +1,12 @@
+// android/build.gradle.kts (Project-level)
+
+plugins {
+    id("com.android.application") apply false   // ใช้เวอร์ชันที่มากับ Flutter
+    id("com.android.library") apply false       // ใช้เวอร์ชันที่มากับ Flutter
+    id("org.jetbrains.kotlin.android") apply false // ใช้เวอร์ชันที่มากับ Flutter (2.1.0)
+    id("dev.flutter.flutter-gradle-plugin") apply false
+}
+
 allprojects {
     repositories {
         google()
@@ -5,20 +14,13 @@ allprojects {
     }
 }
 
-val newBuildDir: Directory =
-    rootProject.layout.buildDirectory
-        .dir("../../build")
-        .get()
-rootProject.layout.buildDirectory.value(newBuildDir)
+rootProject.buildDir = file("../build")
 
 subprojects {
-    val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
-    project.layout.buildDirectory.value(newSubprojectBuildDir)
-}
-subprojects {
+    project.buildDir = file("${rootProject.buildDir}/${project.name}")
     project.evaluationDependsOn(":app")
 }
 
-tasks.register<Delete>("clean") {
-    delete(rootProject.layout.buildDirectory)
+tasks.register("clean", Delete::class) {
+    delete(rootProject.buildDir)
 }

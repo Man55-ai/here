@@ -45,3 +45,7 @@ app.*.map.json
 /android/app/release
 lib/chatttttt.dart
 lib/ssssssdasd.dart
+
+android/app/build
+windows/flutter/generated*
+adb

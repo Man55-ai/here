@@ -90,16 +90,16 @@ class _RootPageState extends State<RootPage> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     return _isLoggedIn
         ? MainPage(
-          userName: _name!,
-          userPhone: _phone!,
-          onLogout: () {
-            setState(() {
-              _isLoggedIn = false;
-              _name = null;
-              _phone = null;
-            });
-          },
-        )
+            userName: _name!,
+            userPhone: _phone!,
+            onLogout: () {
+              setState(() {
+                _isLoggedIn = false;
+                _name = null;
+                _phone = null;
+              });
+            },
+          )
         : LoginPage(onLogin: _saveLogin);
   }
 }
@@ -306,15 +306,13 @@ class _SalesRecordPageState extends State<SalesRecordPage> {
       return;
     }
     try {
-      final inserted =
-          await Supabase.instance.client.from('sales').insert({
-                "shop_name": _selectedShop,
-                "amount": amount,
-                "time": DateTime.now().toIso8601String(),
-                "user_name": widget.userName,
-                "user_phone": widget.userPhone,
-              }).select()
-              as List;
+      final inserted = await Supabase.instance.client.from('sales').insert({
+        "shop_name": _selectedShop,
+        "amount": amount,
+        "time": DateTime.now().toIso8601String(),
+        "user_name": widget.userName,
+        "user_phone": widget.userPhone,
+      }).select() as List;
       if (inserted.isNotEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('บันทึกยอดขายสำหรับ $_selectedShop สำเร็จ!')),
@@ -386,71 +384,69 @@ class _SalesRecordPageState extends State<SalesRecordPage> {
       appBar: AppBar(title: const Text("บันทึกยอดขาย")),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child:
-            _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      DropdownButtonFormField<String>(
-                        decoration: const InputDecoration(
-                          labelText: "เลือกร้านค้า",
-                          border: OutlineInputBorder(),
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                child: Column(
+                  children: [
+                    DropdownButtonFormField<String>(
+                      decoration: const InputDecoration(
+                        labelText: "เลือกร้านค้า",
+                        border: OutlineInputBorder(),
+                      ),
+                      value: _selectedShop,
+                      items: _shopNames
+                          .map(
+                            (shop) => DropdownMenuItem(
+                              value: shop,
+                              child: Text(shop),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (v) => setState(() => _selectedShop = v),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: amountCtrl,
+                      style: const TextStyle(color: Colors.green),
+                      decoration: const InputDecoration(
+                        labelText: "ยอดขาย",
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: _saveSalesData,
+                      child: const Text("บันทึกยอดขาย"),
+                    ),
+                    const Divider(height: 32),
+                    TextField(
+                      controller: reasonCtrl,
+                      decoration: const InputDecoration(
+                        labelText: "เหตุผล (ถ้าไม่ซื้อ)",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    if (_pickedImage != null)
+                      Image.file(_pickedImage!, height: 120),
+                    Row(
+                      children: [
+                        ElevatedButton(
+                          onPressed: _pickImage,
+                          child: const Text("ถ่ายรูป"),
                         ),
-                        value: _selectedShop,
-                        items:
-                            _shopNames
-                                .map(
-                                  (shop) => DropdownMenuItem(
-                                    value: shop,
-                                    child: Text(shop),
-                                  ),
-                                )
-                                .toList(),
-                        onChanged: (v) => setState(() => _selectedShop = v),
-                      ),
-                      const SizedBox(height: 16),
-                      TextField(
-                        controller: amountCtrl,
-                        style: const TextStyle(color: Colors.green),
-                        decoration: const InputDecoration(
-                          labelText: "ยอดขาย",
-                          border: OutlineInputBorder(),
+                        const SizedBox(width: 10),
+                        ElevatedButton(
+                          onPressed: _saveNoPurchase,
+                          child: const Text("ร้านนี้ไม่ซื้อ"),
                         ),
-                        keyboardType: TextInputType.number,
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: _saveSalesData,
-                        child: const Text("บันทึกยอดขาย"),
-                      ),
-                      const Divider(height: 32),
-                      TextField(
-                        controller: reasonCtrl,
-                        decoration: const InputDecoration(
-                          labelText: "เหตุผล (ถ้าไม่ซื้อ)",
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      if (_pickedImage != null)
-                        Image.file(_pickedImage!, height: 120),
-                      Row(
-                        children: [
-                          ElevatedButton(
-                            onPressed: _pickImage,
-                            child: const Text("ถ่ายรูป"),
-                          ),
-                          const SizedBox(width: 10),
-                          ElevatedButton(
-                            onPressed: _saveNoPurchase,
-                            child: const Text("ร้านนี้ไม่ซื้อ"),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+                  ],
                 ),
+              ),
       ),
     );
   }
@@ -498,8 +494,7 @@ class _SalesReportPageState extends State<SalesReportPage> {
       if (time != null &&
           time.year == day.year &&
           time.month == day.month &&
-          time.day == day.day)
-        return sum + (row['amount']?.toDouble() ?? 0);
+          time.day == day.day) return sum + (row['amount']?.toDouble() ?? 0);
       return sum;
     });
   }
@@ -518,15 +513,14 @@ class _SalesReportPageState extends State<SalesReportPage> {
   List<Map<String, dynamic>> _filteredData() {
     if (_selectedDay == null) return [];
 
-    final filteredList =
-        _data.where((row) {
-          DateTime? time =
-              row['time'] != null ? DateTime.tryParse(row['time']) : null;
-          return time != null &&
-              time.year == _selectedDay!.year &&
-              time.month == _selectedDay!.month &&
-              time.day == _selectedDay!.day;
-        }).toList();
+    final filteredList = _data.where((row) {
+      DateTime? time =
+          row['time'] != null ? DateTime.tryParse(row['time']) : null;
+      return time != null &&
+          time.year == _selectedDay!.year &&
+          time.month == _selectedDay!.month &&
+          time.day == _selectedDay!.day;
+    }).toList();
 
     // เรียงลำดับจากใหม่ไปเก่า (เวลาล่าสุดอยู่บนสุด)
     filteredList.sort((a, b) {
@@ -545,37 +539,35 @@ class _SalesReportPageState extends State<SalesReportPage> {
         _selectedDay != null ? _calculateDailyTotal(_selectedDay!) : 0.0;
     final double monthlyTotal = _calculateMonthlyTotal(_focusedDay);
 
-    final String dailyText =
-        _selectedDay != null
-            ? "ยอดรวมวันที่ ${DateFormat('d MMMM yyyy', 'th_TH').format(_selectedDay!)}: ${NumberFormat("#,###").format(dailyTotal)} บาท"
-            : "";
+    final String dailyText = _selectedDay != null
+        ? "ยอดรวมวันที่ ${DateFormat('d MMMM yyyy', 'th_TH').format(_selectedDay!)}: ${NumberFormat("#,###").format(dailyTotal)} บาท"
+        : "";
     final String monthlyText =
         "ยอดรวมเดือน ${DateFormat('MMMM yyyy', 'th_TH').format(_focusedDay)}: ${NumberFormat("#,###").format(monthlyTotal)} บาท";
 
     showDialog(
       context: context,
-      builder:
-          (_) => AlertDialog(
-            title: const Text("สรุปยอดรวม"),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (_selectedDay != null)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Text(dailyText),
-                  ),
-                Text(monthlyText),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("ปิด"),
+      builder: (_) => AlertDialog(
+        title: const Text("สรุปยอดรวม"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (_selectedDay != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Text(dailyText),
               ),
-            ],
+            Text(monthlyText),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("ปิด"),
           ),
+        ],
+      ),
     );
   }
 
@@ -584,84 +576,79 @@ class _SalesReportPageState extends State<SalesReportPage> {
     final filteredData = _filteredData();
     return Scaffold(
       appBar: AppBar(title: const Text("รายงานรายได้")),
-      body:
-          _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : Column(
-                children: [
-                  TableCalendar(
-                    focusedDay: _focusedDay,
-                    firstDay: DateTime.utc(2020, 1, 1),
-                    lastDay: DateTime.utc(2030, 12, 31),
-                    selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-                    onDaySelected:
-                        (selectedDay, focusedDay) => setState(() {
-                          _selectedDay = selectedDay;
-                          _focusedDay = focusedDay;
-                        }),
-                    onPageChanged:
-                        (focusedDay) =>
-                            setState(() => _focusedDay = focusedDay),
-                    calendarFormat: CalendarFormat.month,
-                    locale: 'th_TH',
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                TableCalendar(
+                  focusedDay: _focusedDay,
+                  firstDay: DateTime.utc(2020, 1, 1),
+                  lastDay: DateTime.utc(2030, 12, 31),
+                  selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                  onDaySelected: (selectedDay, focusedDay) => setState(() {
+                    _selectedDay = selectedDay;
+                    _focusedDay = focusedDay;
+                  }),
+                  onPageChanged: (focusedDay) =>
+                      setState(() => _focusedDay = focusedDay),
+                  calendarFormat: CalendarFormat.month,
+                  locale: 'th_TH',
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: _showSummary,
+                        child: const Text("สรุปยอด"),
+                      ),
+                    ],
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ElevatedButton(
-                          onPressed: _showSummary,
-                          child: const Text("สรุปยอด"),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: filteredData.length,
-                      itemBuilder: (_, index) {
-                        final row = filteredData[index];
-                        final userName = row['user_name'] ?? '-';
-                        final phone = row['user_phone'] ?? '-';
-                        // ---------- แก้ไขส่วนนี้ ----------
-                        final time =
-                            row['time'] != null
-                                ? DateTime.tryParse(row['time'])
-                                : null;
-                        final formattedDate =
-                            time != null
-                                ? DateFormat(
-                                  'dd/MM/yyyy HH:mm',
-                                  'th_TH',
-                                ).format(time)
-                                : '-';
-                        // ---------- สิ้นสุดส่วนที่แก้ไข ----------
-                        return ListTile(
-                          title: Text(row['shop_name'] ?? ''),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'ยอด: ${row['amount'] ?? 0}',
-                                style: const TextStyle(
-                                  color: Colors.green,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: filteredData.length,
+                    itemBuilder: (_, index) {
+                      final row = filteredData[index];
+                      final userName = row['user_name'] ?? '-';
+                      final phone = row['user_phone'] ?? '-';
+                      // ---------- แก้ไขส่วนนี้ ----------
+                      final time = row['time'] != null
+                          ? DateTime.tryParse(row['time'])
+                          : null;
+                      final formattedDate = time != null
+                          ? DateFormat(
+                              'dd/MM/yyyy HH:mm',
+                              'th_TH',
+                            ).format(time)
+                          : '-';
+                      // ---------- สิ้นสุดส่วนที่แก้ไข ----------
+                      return ListTile(
+                        title: Text(row['shop_name'] ?? ''),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'ยอด: ${row['amount'] ?? 0}',
+                              style: const TextStyle(
+                                color: Colors.green,
+                                fontWeight: FontWeight.bold,
                               ),
-                              // ---------- เพิ่มบรรทัดนี้ ----------
-                              Text('วันที่และเวลา: $formattedDate'),
-                              // ---------- สิ้นสุดการเพิ่ม ----------
-                              Text('บันทึกโดย: $userName'),
-                              Text('เบอร์โทร: $phone'),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
+                            ),
+                            // ---------- เพิ่มบรรทัดนี้ ----------
+                            Text('วันที่และเวลา: $formattedDate'),
+                            // ---------- สิ้นสุดการเพิ่ม ----------
+                            Text('บันทึกโดย: $userName'),
+                            Text('เบอร์โทร: $phone'),
+                          ],
+                        ),
+                      );
+                    },
                   ),
-                ],
-              ),
+                ),
+              ],
+            ),
     );
   }
 }
@@ -689,12 +676,10 @@ class _NoPurchasePageState extends State<NoPurchasePage> {
   Future<void> _fetchData() async {
     setState(() => _isLoading = true);
     try {
-      final res =
-          await Supabase.instance.client
-                  .from('no_purchase')
-                  .select()
-                  .order('time', ascending: false)
-              as List;
+      final res = await Supabase.instance.client
+          .from('no_purchase')
+          .select()
+          .order('time', ascending: false) as List;
       setState(() {
         _data = res.map((e) => e as Map<String, dynamic>).toList();
       });
@@ -722,76 +707,70 @@ class _NoPurchasePageState extends State<NoPurchasePage> {
       appBar: AppBar(title: const Text("ร้านไม่ซื้อ")),
       body: RefreshIndicator(
         onRefresh: _fetchData,
-        child:
-            _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : Column(
-                  children: [
-                    TableCalendar(
-                      focusedDay: _focusedDay,
-                      firstDay: DateTime.utc(2020, 1, 1),
-                      lastDay: DateTime.utc(2030, 12, 31),
-                      selectedDayPredicate:
-                          (day) => isSameDay(_selectedDay, day),
-                      onDaySelected: (selectedDay, focusedDay) {
-                        setState(() {
-                          _selectedDay = selectedDay;
-                          _focusedDay = focusedDay;
-                        });
-                      },
-                      onPageChanged:
-                          (focusedDay) =>
-                              setState(() => _focusedDay = focusedDay),
-                      locale: 'th_TH',
-                    ),
-                    Row(
-                      children: [
-                        const SizedBox(width: 10),
-                        ElevatedButton(
-                          onPressed: () => setState(() => _selectedDay = null),
-                          child: const Text("รีเซ็ต"),
-                        ),
-                      ],
-                    ),
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: filteredData.length,
-                        itemBuilder: (context, index) {
-                          final row = filteredData[index];
-                          final time =
-                              row['time'] != null
-                                  ? DateTime.tryParse(row['time'])
-                                  : null;
-                          return Card(
-                            child: ListTile(
-                              title: Text(row['shop_name'] ?? '-'),
-                              subtitle: Text(
-                                "เหตุผล: ${row['reason'] ?? '-'}\nวันที่: ${time != null ? DateFormat('dd/MM/yyyy HH:mm').format(time) : '-'}\nผู้บันทึก: ${row['user_name'] ?? ''} (${row['user_phone'] ?? ''})",
-                              ),
-                              trailing:
-                                  row['image_url'] != null
-                                      ? IconButton(
-                                        icon: const Icon(Icons.image),
-                                        onPressed: () {
-                                          showDialog(
-                                            context: context,
-                                            builder:
-                                                (_) => AlertDialog(
-                                                  content: Image.network(
-                                                    row['image_url'],
-                                                  ),
-                                                ),
-                                          );
-                                        },
-                                      )
-                                      : null,
-                            ),
-                          );
-                        },
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : Column(
+                children: [
+                  TableCalendar(
+                    focusedDay: _focusedDay,
+                    firstDay: DateTime.utc(2020, 1, 1),
+                    lastDay: DateTime.utc(2030, 12, 31),
+                    selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                    onDaySelected: (selectedDay, focusedDay) {
+                      setState(() {
+                        _selectedDay = selectedDay;
+                        _focusedDay = focusedDay;
+                      });
+                    },
+                    onPageChanged: (focusedDay) =>
+                        setState(() => _focusedDay = focusedDay),
+                    locale: 'th_TH',
+                  ),
+                  Row(
+                    children: [
+                      const SizedBox(width: 10),
+                      ElevatedButton(
+                        onPressed: () => setState(() => _selectedDay = null),
+                        child: const Text("รีเซ็ต"),
                       ),
+                    ],
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: filteredData.length,
+                      itemBuilder: (context, index) {
+                        final row = filteredData[index];
+                        final time = row['time'] != null
+                            ? DateTime.tryParse(row['time'])
+                            : null;
+                        return Card(
+                          child: ListTile(
+                            title: Text(row['shop_name'] ?? '-'),
+                            subtitle: Text(
+                              "เหตุผล: ${row['reason'] ?? '-'}\nวันที่: ${time != null ? DateFormat('dd/MM/yyyy HH:mm').format(time) : '-'}\nผู้บันทึก: ${row['user_name'] ?? ''} (${row['user_phone'] ?? ''})",
+                            ),
+                            trailing: row['image_url'] != null
+                                ? IconButton(
+                                    icon: const Icon(Icons.image),
+                                    onPressed: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (_) => AlertDialog(
+                                          content: Image.network(
+                                            row['image_url'],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  )
+                                : null,
+                          ),
+                        );
+                      },
                     ),
-                  ],
-                ),
+                  ),
+                ],
+              ),
       ),
     );
   }
@@ -843,59 +822,58 @@ class _YearlyStatsPageState extends State<YearlyStatsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("สรุปยอดรายปี")),
-      body:
-          _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : Padding(
-                padding: const EdgeInsets.all(8),
-                child: BarChart(
-                  BarChartData(
-                    alignment: BarChartAlignment.spaceAround,
-                    maxY: 100000,
-                    barTouchData: BarTouchData(enabled: true),
-                    titlesData: FlTitlesData(
-                      bottomTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          getTitlesWidget: (double value, meta) {
-                            const monthLabels = [
-                              "ม.ค",
-                              "ก.พ",
-                              "มี.ค",
-                              "เม.ย",
-                              "พ.ค",
-                              "มิ.ย",
-                              "ก.ค",
-                              "ส.ค",
-                              "ก.ย",
-                              "ต.ค",
-                              "พ.ย",
-                              "ธ.ค",
-                            ];
-                            return Text(monthLabels[value.toInt()]);
-                          },
-                        ),
-                      ),
-                      leftTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: false, // แก้ไขตรงนี้
-                        ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(8),
+              child: BarChart(
+                BarChartData(
+                  alignment: BarChartAlignment.spaceAround,
+                  maxY: 100000,
+                  barTouchData: BarTouchData(enabled: true),
+                  titlesData: FlTitlesData(
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        getTitlesWidget: (double value, meta) {
+                          const monthLabels = [
+                            "ม.ค",
+                            "ก.พ",
+                            "มี.ค",
+                            "เม.ย",
+                            "พ.ค",
+                            "มิ.ย",
+                            "ก.ค",
+                            "ส.ค",
+                            "ก.ย",
+                            "ต.ค",
+                            "พ.ย",
+                            "ธ.ค",
+                          ];
+                          return Text(monthLabels[value.toInt()]);
+                        },
                       ),
                     ),
-                    gridData: FlGridData(show: true),
-                    borderData: FlBorderData(show: false),
-                    barGroups: List.generate(12, (index) {
-                      final val = _monthTotal(index + 1);
-                      return BarChartGroupData(
-                        x: index,
-                        barRods: [
-                          BarChartRodData(toY: val, color: Colors.green),
-                        ],
-                      );
-                    }),
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: false, // แก้ไขตรงนี้
+                      ),
+                    ),
                   ),
+                  gridData: FlGridData(show: true),
+                  borderData: FlBorderData(show: false),
+                  barGroups: List.generate(12, (index) {
+                    final val = _monthTotal(index + 1);
+                    return BarChartGroupData(
+                      x: index,
+                      barRods: [
+                        BarChartRodData(toY: val, color: Colors.green),
+                      ],
+                    );
+                  }),
                 ),
               ),
+            ),
     );
   }
 }
@@ -943,9 +921,7 @@ class _ProfilePageState extends State<ProfilePage> {
     try {
       final fileName =
           'avatars/${widget.userPhone}.png'; // ใช้เบอร์โทรเป็นชื่อไฟล์
-      await _supabase.storage
-          .from('images')
-          .upload(
+      await _supabase.storage.from('images').upload(
             fileName,
             imageFile,
             fileOptions: const FileOptions(upsert: true), // ✅ อนุญาตอัปโหลดทับ
@@ -989,29 +965,27 @@ class _ProfilePageState extends State<ProfilePage> {
                     backgroundColor: Colors.grey[300],
                     backgroundImage:
                         _imageUrl != null ? NetworkImage(_imageUrl!) : null,
-                    child:
-                        _imageUrl == null
-                            ? const Icon(
-                              Icons.person,
-                              size: 60,
-                              color: Colors.grey,
-                            )
-                            : null,
+                    child: _imageUrl == null
+                        ? const Icon(
+                            Icons.person,
+                            size: 60,
+                            color: Colors.grey,
+                          )
+                        : null,
                   ),
                   Positioned(
                     bottom: 0,
                     right: 0,
-                    child:
-                        _isUploading
-                            ? const SizedBox(
-                              width: 30,
-                              height: 30,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                            : IconButton(
-                              icon: const Icon(Icons.camera_alt, size: 30),
-                              onPressed: _pickImage,
-                            ),
+                    child: _isUploading
+                        ? const SizedBox(
+                            width: 30,
+                            height: 30,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : IconButton(
+                            icon: const Icon(Icons.camera_alt, size: 30),
+                            onPressed: _pickImage,
+                          ),
                   ),
                 ],
               ),

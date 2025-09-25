@@ -1,41 +1,44 @@
 // android/app/build.gradle.kts
 import java.util.Properties
-import java.io.FileInputStream
 
 plugins {
     id("com.android.application")
-    id("kotlin-android")
+    id("org.jetbrains.kotlin.android")
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-val keystoreProperties = Properties()
+// โหลด key.properties (ถ้ามี)
 val keystorePropertiesFile = rootProject.file("key.properties")
-if (keystorePropertiesFile.exists()) {
-    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+val keystoreProperties = Properties().apply {
+    if (keystorePropertiesFile.exists()) {
+        load(keystorePropertiesFile.inputStream())
+    }
 }
 
 android {
-    namespace = "com.example.test" // ให้ตรงกับ package ของ MainActivity.kt/Manifest
-    compileSdk = 36 // ถ้า build ไม่ผ่านเพราะยังไม่ติดตั้ง 36 ให้ใช้ 34 ไปก่อน
+    namespace = "com.example.hereme"
+
+    // ใช้ SDK 36 + Build-Tools 36.0.0 (ตัว stable)
+    compileSdk = 36
+    buildToolsVersion = "36.0.0"
 
     defaultConfig {
-        applicationId = "com.example.test"
-        minSdk = flutter.minSdkVersion
+        applicationId = "com.example.hereme"
+        minSdk = 24
         targetSdk = 36
         versionCode = 1
         versionName = "1.0.0"
+        multiDexEnabled = true
     }
 
-    // ผูก signing เฉพาะเมื่อมี key.properties
-    if (keystorePropertiesFile.exists()) {
-        signingConfigs {
-            create("release") {
+    // ✅ ต้องอยู่ "ใน" android { } เสมอ
+    signingConfigs {
+        create("release") {
+            if (keystorePropertiesFile.exists()) {
                 keyAlias = keystoreProperties["keyAlias"] as String?
                 keyPassword = keystoreProperties["keyPassword"] as String?
-                // NOTE: ใน key.properties ให้ตั้ง storeFile=hereme.keystore (ไม่ต้องมี app/)
                 storeFile = (keystoreProperties["storeFile"] as String?)?.let { file(it) }
                 storePassword = keystoreProperties["storePassword"] as String?
-                storeType = "pkcs12" // <<< สำคัญสำหรับไฟล์ .keystore ที่เป็น PKCS12
             }
         }
     }
@@ -47,20 +50,30 @@ android {
             if (keystorePropertiesFile.exists()) {
                 signingConfig = signingConfigs.getByName("release")
             }
+            // ถ้าไม่มีไฟล์ proguard-rules.pro ให้สร้างไฟล์ว่างๆ ใน app/
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
-        getByName("debug") { }
+        getByName("debug") { /* ค่าดีฟอลต์พอแล้ว */ }
     }
 
-    // JDK ที่ใช้รัน AGP ควรเป็น 17; ส่วน source/target 11 ใช้ได้
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+    // กันชนกรณี libaosl.so ซ้ำจาก Agora
+    packaging {
+        jniLibs {
+            pickFirsts += listOf("**/libaosl.so")
+        }
     }
-    kotlinOptions { jvmTarget = "11" }
+
+    // ใช้ JDK 17 สำหรับคอมไพล์ (JBR 21 ใช้รัน Gradle ได้ ไม่ขัดกัน)
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = "17"
+    }
 }
 
-flutter { source = "../.." }
+// dependencies {} ปล่อยว่างได้ (Flutter จัดการเอง)
